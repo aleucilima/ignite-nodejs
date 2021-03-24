@@ -23,7 +23,7 @@ app.put("/courses/:id", (request, response) => {
 
 //Alteração parcial PATCH
 app.patch("/courses/:id", (request, response) => {
-    return response.json(["Curso 6", "Curso 7", "Curso 3", "Curso 4"])
+    return response.json(["Curso 6", "Curso 8", "Curso 3", "Curso 4"])
 })
 
 //Delete DELETE
