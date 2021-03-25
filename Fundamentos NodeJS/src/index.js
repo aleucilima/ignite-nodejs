@@ -10,15 +10,35 @@ const customers = []
 app.post('/account', (request, response) => {
     const { cpf, name } = request.body
 
-    const id = uuidv4()
+    //verifica se já existe mesmo cpf cadastrado
+    const custumerAlreadyExists = customers.some(
+        (custumer) => custumer.cpf === cpf
+    )
+
+    if (custumerAlreadyExists) {
+        return response.status(400).json({ error: 'Custumer already exists'})
+    }
 
     customers.push({
         cpf,
         name,
-        id,
-        statements: []
+        id: uuidv4(),
+        statement: []
     })
     return response.status(201).send()
+})
+
+app.get('/statement/', (request, response) => {
+    const { cpf } = request.headers
+
+    const customer = customers.find((custumer) => custumer.cpf === cpf)
+
+    if(!customer) {
+        return response.status(400).json({ error: 'Custumer Not Found' })
+    }
+
+
+    return response.json(customer.statement)
 })
 
 app.listen(3333)
