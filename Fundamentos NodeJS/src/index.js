@@ -7,12 +7,28 @@ app.use(express.json())
 
 const customers = []
 
+//Middleware
+function verifyIfExistAccountCPF (request, response, next) {
+    const { cpf } = request.headers
+
+    const customer = customers.find((custumer) => custumer.cpf === cpf)
+
+    if(!customer) {
+        return response.status(400).json({ error: 'Custumer Not Found' })
+    }
+
+    request.customer
+
+    return next()
+
+}
+
 app.post('/account', (request, response) => {
     const { cpf, name } = request.body
 
     //verifica se já existe mesmo cpf cadastrado
-    const custumerAlreadyExists = customers.some(
-        (custumer) => custumer.cpf === cpf
+    const customerAlreadyExists = customers.some(
+        (customer) => customer.cpf === cpf
     )
 
     if (custumerAlreadyExists) {
@@ -28,16 +44,7 @@ app.post('/account', (request, response) => {
     return response.status(201).send()
 })
 
-app.get('/statement/', (request, response) => {
-    const { cpf } = request.headers
-
-    const customer = customers.find((custumer) => custumer.cpf === cpf)
-
-    if(!customer) {
-        return response.status(400).json({ error: 'Custumer Not Found' })
-    }
-
-
+app.get('/statement/', verifyIfExistAccountCPF, (request, response) => {
     return response.json(customer.statement)
 })
 
