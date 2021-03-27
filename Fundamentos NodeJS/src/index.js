@@ -7,8 +7,8 @@ app.use(express.json())
 
 const customers = []
 
-//Middleware
-function verifyIfExistAccountCPF (request, response, next) {
+//Middleware de verificação de existencia da conta
+function verifyIfExistAccountCPF(request, response, next) {
     const { cpf } = request.headers
 
     const customer = customers.find((custumer) => custumer.cpf === cpf)
@@ -23,8 +23,9 @@ function verifyIfExistAccountCPF (request, response, next) {
 
 }
 
-function getBalance (statement) {
-    const balance = statement.reduce((acc, operator) => {
+//Realiza a operação de balanço
+function getBalance(statement) {
+    const balance = statement.reduce((acc, operation) => {
         if(operation.type === 'credit') {
             return acc + operation.amount
         } else {
@@ -35,6 +36,7 @@ function getBalance (statement) {
     return balance
 }
 
+//Cria a conta
 app.post('/account', (request, response) => {
     const { cpf, name } = request.body
 
@@ -56,12 +58,14 @@ app.post('/account', (request, response) => {
     return response.status(201).send()
 })
 
+//Cria o extrato verificando se a conta existe
 app.get('/statement/', verifyIfExistAccountCPF, (request, response) => {
     const { customer } = request
 
     return response.json(customer.statement)
 })
 
+//Cria o depósito verificando se a conta existe
 app.post('/deposit/', verifyIfExistAccountCPF, (request, response) => {
     const { description, amount } = request.body
 
@@ -70,7 +74,7 @@ app.post('/deposit/', verifyIfExistAccountCPF, (request, response) => {
     const statementOperation = {
         description,
         amount,
-        create_at: new Date(),
+        created_at: new Date(),
         type: 'credit'
     }
 
@@ -79,6 +83,7 @@ app.post('/deposit/', verifyIfExistAccountCPF, (request, response) => {
     return response.status(201).send()
 })
 
+//Cria o saque, verificando se a conta existe
 app.post('/withdraw', verifyIfExistAccountCPF, (request, response) => {
     const { amount } = request.body
     const { customer } = request
@@ -95,8 +100,10 @@ app.post('/withdraw', verifyIfExistAccountCPF, (request, response) => {
         type: 'debit'
     }
 
-    custumer.statement.push(statementOperation)
+    customer.statement.push(statementOperation)
 
     return response.status(201).send()
 })
+
+
 app.listen(3333)
